@@ -37,12 +37,12 @@ class COCODataset(Loader):
 
     def load_data(self):
         ground_truth_data = None
-        if ((self.name == 'train2017') or (self.name == 'val2017')):
+        if ((self.name == 'train2017') or (self.name == 'val2017') or (self.name == 'test2017')):
             ground_truth_data = self._load_COCO(self.name, self.split)
         elif isinstance(self.name, list):
             if not isinstance(self.split, list):
                 raise Exception("'split' should also be a list")
-            if set(self.name).issubset(['train2017', 'val2017']):
+            if set(self.name).issubset(['train2017', 'val2017', 'test2017']):
                 data_A = self._load_COCO(self.name[0], self.split[0])
                 data_B = self._load_COCO(self.name[1], self.split[1])
                 ground_truth_data = data_A + data_B
@@ -80,7 +80,7 @@ class COCOParser(object):
                  dataset_name='train2017',
                  evaluate=False):
 
-        if dataset_name not in ['train2017', 'val2017']:
+        if dataset_name not in ['train2017', 'val2017', 'test2017']:
             raise Exception('Invalid dataset name.')
 
         # creating data set prefix paths variables
@@ -94,8 +94,10 @@ class COCOParser(object):
         self.image_ids = self.coco.getImgIds()
         if "train" in self.dataset_name:
             self.image_ids = [114540, 117156, 128224, 130733, 253710, 438751, 487851, 581929]
+        elif "val" in self.dataset_name:
+            self.image_ids = [191672, 309391, 344611]
         else:
-            self.image_ids = [191672, 309391, 344611, 347456, 459954]
+            self.image_ids = [347456, 459954]
         self.evaluate = evaluate
         self.class_names = class_names
         if self.class_names == 'all':

@@ -24,7 +24,7 @@ COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
 # COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
 description = 'Training script for single-shot object detection models'
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('-bs', '--batch_size', default=32, type=int,
+parser.add_argument('-bs', '--batch_size', default=16, type=int,
                     help='Batch size for training')
 parser.add_argument('-et', '--evaluation_period', default=10, type=int,
                     help='evaluation frequency')
@@ -52,8 +52,8 @@ args = parser.parse_args()
 
 optimizer = SGD(args.learning_rate, args.momentum)
 
-data_splits = ['train', 'test']
-data_names = ['train2017', 'val2017']
+data_splits = ['train', 'val', 'test']
+data_names = ['train2017', 'val2017', 'test2017']
 
 # loading datasets
 data_managers, datasets, evaluation_data_managers = [], [], []
@@ -67,7 +67,7 @@ for data_name, data_split in zip(data_names, data_splits):
         evaluation_data_managers.append(eval_data_manager)
 # instantiating model
 num_classes = data_managers[0].num_classes
-model = SSD300(num_classes, base_weights='VGG', head_weights=None)
+model = SSD300(num_classes, base_weights=None, head_weights=None)
 model.summary()
 
 # Instantiating loss and metrics
