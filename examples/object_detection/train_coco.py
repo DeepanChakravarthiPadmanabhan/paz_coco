@@ -20,21 +20,21 @@ from paz.optimization.callbacks import EvaluateMAP
 from paz.pipelines import DetectSingleShot
 from paz.processors import TRAIN, VAL
 
-COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
-# COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
+# COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
+COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
 description = 'Training script for single-shot object detection models'
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('-bs', '--batch_size', default=16, type=int,
+parser.add_argument('-bs', '--batch_size', default=8, type=int,
                     help='Batch size for training')
-parser.add_argument('-et', '--evaluation_period', default=10, type=int,
+parser.add_argument('-et', '--evaluation_period', default=5, type=int,
                     help='evaluation frequency')
-parser.add_argument('-lr', '--learning_rate', default=0.001, type=float,
+parser.add_argument('-lr', '--learning_rate', default=0.0005, type=float,
                     help='Initial learning rate for SGD')
 parser.add_argument('-m', '--momentum', default=0.9, type=float,
                     help='Momentum for SGD')
 parser.add_argument('-g', '--gamma_decay', default=0.1, type=float,
                     help='Gamma decay for learning rate scheduler')
-parser.add_argument('-e', '--num_epochs', default=240, type=int,
+parser.add_argument('-e', '--num_epochs', default=200, type=int,
                     help='Maximum number of epochs before finishing')
 parser.add_argument('-iou', '--AP_IOU', default=0.5, type=float,
                     help='Average precision IOU used for evaluation')

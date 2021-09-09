@@ -1,16 +1,16 @@
 import tensorflow as tf
-gpus = tf.config.experimental.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(gpus[0], True)
+# gpus = tf.config.experimental.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(gpus[0], True)
 
 
 import numpy as np
 from paz.models import SSD300
-from paz.datasets import VOC
+from paz.datasets import VOC, COCODataset
 from paz.abstract import Processor, SequentialProcessor
 from paz import processors as pr
 from detection import AugmentDetection
 # from paz.pipelines import AugmentDetection
-
+import matplotlib.pyplot as plt
 
 class ShowBoxes(Processor):
     def __init__(self, class_names, prior_boxes,
@@ -41,18 +41,21 @@ split = 'train'
 epochs = 120
 batch_size = 30
 
-data_manager = VOC('VOCdevkit/')
+# data_manager = VOC('VOCdevkit/')
+COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
+data_manager = COCODataset(COCO_DATASET_PATH, split, name='train2017')
 data = data_manager.load_data()
 
 class_names = data_manager.class_names
+num_classes = len(class_names)
 # model = SSD300(base_weights='VGG', head_weights=None)
 model = SSD300()
 prior_boxes = model.prior_boxes
 
-testor_encoder = AugmentDetection(prior_boxes)
+testor_encoder = AugmentDetection(prior_boxes, num_classes=num_classes)
 testor_decoder = ShowBoxes(class_names, prior_boxes)
 sample_arg = 0
-for sample_arg in range(1000):
+for sample_arg in range(1):
     sample = data[sample_arg]
     wrapped_outputs = testor_encoder(sample)
     print(wrapped_outputs['labels'])

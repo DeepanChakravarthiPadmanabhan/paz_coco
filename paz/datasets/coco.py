@@ -92,12 +92,12 @@ class COCOParser(object):
         self.images_path = os.path.join(self.dataset_path, self.dataset_name)
         self.coco = COCO(self.annotations_path)
         self.image_ids = self.coco.getImgIds()
-        if "train" in self.dataset_name:
-            self.image_ids = [114540, 117156, 128224, 130733, 253710, 438751, 487851, 581929]
-        elif "val" in self.dataset_name:
-            self.image_ids = [191672, 309391, 344611]
-        else:
-            self.image_ids = [347456, 459954]
+        # if "train" in self.dataset_name:
+        #     self.image_ids = [114540, 117156, 128224, 130733, 253710, 438751, 487851, 581929]
+        # elif "val" in self.dataset_name:
+        #     self.image_ids = [191672, 309391, 344611]
+        # else:
+        #     self.image_ids = [347456, 459954]
         self.evaluate = evaluate
         self.class_names = class_names
         if self.class_names == 'all':
@@ -144,8 +144,8 @@ class COCOParser(object):
                 continue
             x_min = annotation['bbox'][0] / width
             y_min = annotation['bbox'][1] / height
-            x_max = annotation['bbox'][0] + annotation['bbox'][2] / width
-            y_max = annotation['bbox'][1] + annotation['bbox'][3] / height
+            x_max = (annotation['bbox'][0] + annotation['bbox'][2]) / width
+            y_max = (annotation['bbox'][1] + annotation['bbox'][3]) / height
             class_arg = self.coco_label_to_label(annotation['category_id'])
             box_data.append([x_min, y_min, x_max, y_max, class_arg])
         return box_data
@@ -168,6 +168,8 @@ class COCOParser(object):
     def _process_image_labels(self):
         for image_index in self.image_ids:
             image_path = self.get_image_path(image_index)
+            if not(os.path.exists(image_path)):
+                continue
             annotations_ids = self.coco.getAnnIds(imgIds=image_index,
                                                   iscrowd=False)
             if len(annotations_ids) == 0:
