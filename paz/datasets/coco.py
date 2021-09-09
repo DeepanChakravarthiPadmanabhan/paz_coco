@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from ..abstract import Loader
 from .utils import get_class_names
 from pycocotools.coco import COCO
@@ -89,6 +90,10 @@ class COCOParser(object):
         self.images_path = os.path.join(self.dataset_path, self.dataset_name)
         self.coco = COCO(self.annotations_path)
         self.image_ids = self.coco.getImgIds()
+        if "train" in self.dataset_name:
+            self.image_ids = [114540, 117156, 128224, 130733, 253710, 438751, 487851, 581929]
+        else:
+            self.image_ids = [191672, 309391, 344611, 347456, 459954]
         self.evaluate = evaluate
         self.class_names = class_names
         if self.class_names == 'all':
@@ -143,7 +148,7 @@ class COCOParser(object):
                                                   iscrowd=False)
             box_data = []
             if len(annotations_ids) == 0:
-                box_data.append([])
+                continue
             annotations = self.coco.loadAnns(annotations_ids)
             for idx, annotation in enumerate(annotations):
                 if annotation['bbox'][2] < 1 or annotation['bbox'][3] < 1:
@@ -154,6 +159,7 @@ class COCOParser(object):
                 y_max = annotation['bbox'][1] + annotation['bbox'][3]
                 class_arg = self.coco_label_to_label(annotation['category_id'])
                 box_data.append([x_min, y_min, x_max, y_max, class_arg])
+            box_data = np.asarray(box_data)
             self.data.append({'image': image_path, 'boxes': box_data})
 
     def load_data(self):

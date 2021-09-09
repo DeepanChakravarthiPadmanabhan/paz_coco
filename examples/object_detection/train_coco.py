@@ -20,7 +20,8 @@ from paz.optimization.callbacks import EvaluateMAP
 from paz.pipelines import DetectSingleShot
 from paz.processors import TRAIN, VAL
 
-COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
+# COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
+COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
 description = 'Training script for single-shot object detection models'
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument('-bs', '--batch_size', default=32, type=int,
@@ -69,7 +70,6 @@ num_classes = data_managers[0].num_classes
 model = SSD300(num_classes, base_weights='VGG', head_weights=None)
 model.summary()
 
-print(num_classes)
 # Instantiating loss and metrics
 loss = MultiBoxLoss()
 metrics = {'boxes': [loss.localization,
@@ -81,7 +81,7 @@ model.compile(optimizer, loss.compute_loss, metrics)
 # setting data augmentation pipeline
 augmentators = []
 for split in [TRAIN, VAL]:
-    augmentator = AugmentDetection(model.prior_boxes, split)
+    augmentator = AugmentDetection(model.prior_boxes, split, num_classes=num_classes)
     augmentators.append(augmentator)
 
 # setting sequencers
