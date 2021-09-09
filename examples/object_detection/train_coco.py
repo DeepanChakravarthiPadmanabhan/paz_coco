@@ -20,8 +20,8 @@ from paz.optimization.callbacks import EvaluateMAP
 from paz.pipelines import DetectSingleShot
 from paz.processors import TRAIN, VAL
 
-# COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
-COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
+COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
+# COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
 description = 'Training script for single-shot object detection models'
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument('-bs', '--batch_size', default=32, type=int,

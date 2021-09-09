@@ -25,7 +25,7 @@ class COCODataset(Loader):
         to the amount of boxes in the image.
 
     """
-    def __init__(self, path=None, split='train', class_names='all',
+    def __init__(self, path='../datasets/MSCOCO', split='train', class_names='all',
                  name='train2017', evaluate=False):
         super(COCODataset, self).__init__(path, split, class_names, name)
         self.evaluate = evaluate
@@ -51,10 +51,10 @@ class COCODataset(Loader):
         return ground_truth_data
 
     def _load_COCO(self, dataset_name, split):
-        self.parser = COCOParser(dataset_name,
+        self.parser = COCOParser(self.path,
                                  split,
                                  self._class_names,
-                                 self.path,
+                                 dataset_name,
                                  self.evaluate)
         self.images_path = self.parser.images_path
         self.arg_to_class = self.parser.arg_to_class
@@ -73,9 +73,11 @@ class COCOParser(object):
         num_objects refers to the number of objects in that specific image
     """
 
-    def __init__(self, dataset_name='train2017', split='train',
+    def __init__(self,
+                 dataset_path='../datasets/MSCOCO',
+                 split='train',
                  class_names='all',
-                 dataset_path='/media/deepan/externaldrive1/datasets_project_repos/mscoco',
+                 dataset_name='train2017',
                  evaluate=False):
 
         if dataset_name not in ['train2017', 'val2017']:
@@ -123,6 +125,29 @@ class COCOParser(object):
         """Map label as used by the network to labels as used by COCO."""
         return self.coco_labels[label]
 
+    def get_image_path(self, image_index):
+        image_info = self.coco.loadImgs(image_index)[0]
+        image_path = os.path.join(self.images_path, image_info['file_name'])
+        return image_path
+
+    def get_image_size(self, image_index):
+        image = self.coco.loadImgs(image_index)[0]
+        return float(image['width']), float(image['height'])
+
+    def get_box_coordinates(self, annotations, image_index):
+        box_data = []
+        width, height = self.get_image_size(image_index)
+        for idx, annotation in enumerate(annotations):
+            if annotation['bbox'][2] < 1 or annotation['bbox'][3] < 1:
+                continue
+            x_min = annotation['bbox'][0] / width
+            y_min = annotation['bbox'][1] / height
+            x_max = annotation['bbox'][0] + annotation['bbox'][2] / width
+            y_max = annotation['bbox'][1] + annotation['bbox'][3] / height
+            class_arg = self.coco_label_to_label(annotation['category_id'])
+            box_data.append([x_min, y_min, x_max, y_max, class_arg])
+        return box_data
+
     def load_classes(self):
         categories = self.coco.loadCats(self.coco.getCatIds())
         categories.sort(key=lambda x: x['id'])
@@ -134,31 +159,19 @@ class COCOParser(object):
             self.coco_labels[len(arg_to_class)] = c['id']
             self.coco_labels_inverse[c['id']] = len(arg_to_class)
             arg_to_class[c['name']] = len(arg_to_class)
-
-        # also load the reverse (label -> name)
         for key, value in arg_to_class.items():
             class_to_arg[value] = key
         return class_to_arg, arg_to_class
 
     def _process_image_labels(self):
         for image_index in self.image_ids:
-            image_info = self.coco.loadImgs(image_index)[0]
-            image_path = os.path.join(self.images_path, image_info['file_name'])
+            image_path = self.get_image_path(image_index)
             annotations_ids = self.coco.getAnnIds(imgIds=image_index,
                                                   iscrowd=False)
-            box_data = []
             if len(annotations_ids) == 0:
                 continue
             annotations = self.coco.loadAnns(annotations_ids)
-            for idx, annotation in enumerate(annotations):
-                if annotation['bbox'][2] < 1 or annotation['bbox'][3] < 1:
-                    continue
-                x_min = annotation['bbox'][0]
-                y_min = annotation['bbox'][1]
-                x_max = annotation['bbox'][0] + annotation['bbox'][2]
-                y_max = annotation['bbox'][1] + annotation['bbox'][3]
-                class_arg = self.coco_label_to_label(annotation['category_id'])
-                box_data.append([x_min, y_min, x_max, y_max, class_arg])
+            box_data = self.get_box_coordinates(annotations, image_index)
             box_data = np.asarray(box_data)
             self.data.append({'image': image_path, 'boxes': box_data})
 
