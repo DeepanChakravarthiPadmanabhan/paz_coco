@@ -24,7 +24,7 @@ from paz.processors import TRAIN, VAL
 COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
 description = 'Training script for single-shot object detection models'
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('-bs', '--batch_size', default=8, type=int,
+parser.add_argument('-bs', '--batch_size', default=16, type=int,
                     help='Batch size for training')
 parser.add_argument('-et', '--evaluation_period', default=5, type=int,
                     help='evaluation frequency')
@@ -67,7 +67,7 @@ for data_name, data_split in zip(data_names, data_splits):
         evaluation_data_managers.append(eval_data_manager)
 # instantiating model
 num_classes = data_managers[0].num_classes
-model = SSD300(num_classes, base_weights=None, head_weights=None)
+model = SSD300(num_classes, base_weights='VOC', head_weights=None)
 model.summary()
 
 # Instantiating loss and metrics
