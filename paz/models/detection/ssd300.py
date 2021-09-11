@@ -198,5 +198,5 @@ def SSD300(num_classes=21, base_weights='VOC', head_weights=None,
                                    'SSD300-VOC-None_weights.hdf5']
         by_name = True if model_filename in finetunning_model_names else False
         model.load_weights(weights_path, by_name)
-    model.prior_boxes = create_prior_boxes('COCO')
+    model.prior_boxes = create_prior_boxes('VOC')
     return model
