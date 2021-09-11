@@ -1,8 +1,8 @@
 import os
 import argparse
 import tensorflow as tf
-# gpus = tf.config.experimental.list_physical_devices('GPU')
-# tf.config.experimental.set_memory_growth(gpus[0], True)
+gpus = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # from tensorflow.python.framework.ops import disable_eager_execution
 # disable_eager_execution()
@@ -28,9 +28,9 @@ parser.add_argument('-bs', '--batch_size', default=8, type=int,
                     help='Batch size for training')
 parser.add_argument('-et', '--evaluation_period', default=5, type=int,
                     help='evaluation frequency')
-parser.add_argument('-lr', '--learning_rate', default=0.0005, type=float,
+parser.add_argument('-lr', '--learning_rate', default=0.001, type=float,
                     help='Initial learning rate for SGD')
-parser.add_argument('-m', '--momentum', default=0.9, type=float,
+parser.add_argument('-m', '--momentum', default=0.5, type=float,
                     help='Momentum for SGD')
 parser.add_argument('-g', '--gamma_decay', default=0.1, type=float,
                     help='Gamma decay for learning rate scheduler')

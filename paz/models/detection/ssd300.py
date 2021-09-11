@@ -6,16 +6,16 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.utils import get_file
 
-from ..layers import Conv2DNormalization
-from .utils import create_multibox_head
-from .utils import create_prior_boxes
+from paz.models.layers import Conv2DNormalization
+from paz.models.detection.utils import create_multibox_head
+from paz.models.detection.utils import create_prior_boxes
 
 
 WEIGHT_PATH = (
     'https://github.com/oarriaga/altamira-data/releases/download/v0.2/')
 
 
-def SSD300(num_classes=21, base_weights='VOC', head_weights='VOC',
+def SSD300(num_classes=21, base_weights='VOC', head_weights=None,
            input_shape=(300, 300, 3), num_priors=[4, 6, 6, 6, 4, 4],
            l2_loss=0.0005, return_base=False, trainable_base=True):
 
@@ -198,5 +198,5 @@ def SSD300(num_classes=21, base_weights='VOC', head_weights='VOC',
                                    'SSD300-VOC-None_weights.hdf5']
         by_name = True if model_filename in finetunning_model_names else False
         model.load_weights(weights_path, by_name)
-    model.prior_boxes = create_prior_boxes('VOC')
+    model.prior_boxes = create_prior_boxes('COCO')
     return model
