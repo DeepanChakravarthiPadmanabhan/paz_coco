@@ -37,7 +37,8 @@ class COCODataset(Loader):
 
     def load_data(self):
         ground_truth_data = None
-        if ((self.name == 'train2017') or (self.name == 'val2017') or (self.name == 'test2017')):
+        if ((self.name == 'train2017') or (self.name == 'val2017') or
+                (self.name == 'test2017')):
             ground_truth_data = self._load_COCO(self.name, self.split)
         elif isinstance(self.name, list):
             if not isinstance(self.split, list):

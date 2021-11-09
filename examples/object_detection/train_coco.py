@@ -1,8 +1,8 @@
 import os
 import argparse
 import tensorflow as tf
-gpus = tf.config.experimental.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(gpus[0], True)
+# gpus = tf.config.experimental.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # from tensorflow.python.framework.ops import disable_eager_execution
 # disable_eager_execution()
@@ -12,7 +12,7 @@ from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import CSVLogger, ModelCheckpoint
 from paz.optimization.callbacks import LearningRateScheduler
 from detection import AugmentDetection
-from paz.models import SSD300
+from paz.models import SSD512
 from paz.datasets import COCODataset
 from paz.optimization import MultiBoxLoss
 from paz.abstract import ProcessingSequence
@@ -20,11 +20,11 @@ from paz.optimization.callbacks import EvaluateMAP
 from paz.pipelines import DetectSingleShot
 from paz.processors import TRAIN, VAL
 
-# COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/mscoco'
-COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
+COCO_DATASET_PATH = '/media/deepan/externaldrive1/datasets_project_repos/coco'
+# COCO_DATASET_PATH = '/scratch/dpadma2s/coco/'
 description = 'Training script for single-shot object detection models'
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('-bs', '--batch_size', default=16, type=int,
+parser.add_argument('-bs', '--batch_size', default=1, type=int,
                     help='Batch size for training')
 parser.add_argument('-et', '--evaluation_period', default=5, type=int,
                     help='evaluation frequency')
@@ -52,8 +52,8 @@ args = parser.parse_args()
 
 optimizer = SGD(args.learning_rate, args.momentum)
 
-data_splits = ['train', 'val', 'test']
-data_names = ['train2017', 'val2017', 'test2017']
+data_splits = ['train', 'val']
+data_names = ['train2017', 'val2017']
 
 # loading datasets
 data_managers, datasets, evaluation_data_managers = [], [], []
@@ -67,7 +67,7 @@ for data_name, data_split in zip(data_names, data_splits):
         evaluation_data_managers.append(eval_data_manager)
 # instantiating model
 num_classes = data_managers[0].num_classes
-model = SSD300(num_classes, base_weights='VOC', head_weights=None)
+model = SSD512(num_classes, weights=None)
 model.summary()
 
 # Instantiating loss and metrics
@@ -81,7 +81,8 @@ model.compile(optimizer, loss.compute_loss, metrics)
 # setting data augmentation pipeline
 augmentators = []
 for split in [TRAIN, VAL]:
-    augmentator = AugmentDetection(model.prior_boxes, split, num_classes=num_classes)
+    augmentator = AugmentDetection(model.prior_boxes, split,
+                                   num_classes=num_classes, size=512)
     augmentators.append(augmentator)
 
 # setting sequencers
@@ -100,7 +101,7 @@ checkpoint = ModelCheckpoint(save_path, verbose=1, save_weights_only=True)
 schedule = LearningRateScheduler(
     args.learning_rate, args.gamma_decay, args.scheduled_epochs)
 evaluate = EvaluateMAP(
-    evaluation_data_managers[0],
+    data_managers[1],
     DetectSingleShot(model, data_managers[0].class_names, 0.01, 0.45),
     args.evaluation_period,
     args.save_path,
@@ -115,3 +116,5 @@ model.fit(
     validation_data=sequencers[1],
     use_multiprocessing=args.multiprocessing,
     workers=args.workers)
+
+model.save_weights('final.h5')

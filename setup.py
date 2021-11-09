@@ -8,5 +8,5 @@ setup(name='pypaz',
       author='Octavio Arriaga',
       author_email='octavio.arriaga@dfki.de',
       license='MIT',
-      install_requires=['opencv-python', 'tensorflow', 'numpy'],
+      install_requires=['opencv-python', 'numpy'],
       packages=find_packages())
